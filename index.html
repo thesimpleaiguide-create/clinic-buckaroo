@@ -9,6 +9,10 @@
     <link rel="preload" as="image" href="https://thesimpleaiguide-create.github.io/clinic-buckaroo/buckaroo-bg.jpeg">
 
     <!-- URL FIXER -->
+    <script>
+        if (window.location.pathname.endsWith('.html/')) {
+            window.location.replace(window.location.href.replace('.html/', '.html'));
+        }
     </script>
 
     <script src="https://cdn.tailwindcss.com"></script>
@@ -227,8 +231,11 @@
             </div>
 
             <p id="modal-desc" class="text-lg text-slate-200 mb-6 italic leading-relaxed font-light pl-6 border-l-4 border-amber-500/50"></p>
-            <p id="question-text" class="text-2xl text-slate-100 mb-10 leading-snug font-medium pr-10"></p>
-            <div id="option-list" class="grid gap-3 md:grid-cols-2"></div>
+            
+            <div class="space-y-4">
+                <p class="text-[11px] font-black text-slate-500 uppercase tracking-[0.3em] ml-2 text-nowrap">Select your stabilizing response:</p>
+                <div id="tool-options" class="grid gap-3"></div>
+            </div>
         </div>
     </div>
 
@@ -407,20 +414,41 @@
             document.getElementById('phase-playing').classList.remove('flex');
             
             const resultPhase = document.getElementById('phase-result');
+            
+            if (!won) {
+                const vidOverlay = document.getElementById('video-overlay');
+                const vid = document.getElementById('failure-video');
+                
+                vidOverlay.classList.remove('opacity-0', 'pointer-events-none', '-z-50');
+                vidOverlay.classList.add('opacity-100', 'z-[100]');
+                
+                vid.play().catch(() => finishEndGame(false));
+                vid.onended = () => { 
+                    vidOverlay.classList.add('opacity-0', 'pointer-events-none', '-z-50');
+                    vidOverlay.classList.remove('opacity-100', 'z-[100]');
+                    finishEndGame(false); 
+                };
+            } else { 
+                finishEndGame(true); 
+            }
+        }
+
+        function finishEndGame(won) {
+            const resultPhase = document.getElementById('phase-result');
             resultPhase.classList.remove('phase-hidden');
-            resultPhase.classList.add('flex');
+            resultPhase.classList.add('phase-active');
             
             const title = document.getElementById('result-title');
             const body = document.getElementById('result-body');
             const icon = document.getElementById('result-icon-container');
 
             if (won) {
-                icon.innerHTML = `<div class="w-full h-full bg-slate-900 flex items-center justify-center rounded-[32px] border-4 border-amber-400"><i data-lucide="award" class="w-16 h-16 text-amber-400"></i></div>`;
+                icon.innerHTML = `<div class="w-32 h-32 bg-slate-900 flex items-center justify-center rounded-[32px] border-4 border-amber-400"><i data-lucide="award" class="w-16 h-16 text-amber-400"></i></div>`;
                 title.innerText = "PERFECT BALANCE!"; 
                 title.className = "text-6xl font-black uppercase mb-4 tracking-tighter show-font italic text-amber-400";
                 body.innerText = "Incredible work! You safely loaded all stressors onto the system without triggering a reaction. By leading with empathy, transparency, and clear boundaries, you kept the interaction perfectly stable.";
             } else {
-                icon.innerHTML = `<div class="w-full h-full bg-red-600 rounded-[32px] flex items-center justify-center shadow-2xl"><i data-lucide="zap" class="w-16 h-16 text-white"></i></div>`;
+                icon.innerHTML = `<div class="w-32 h-32 bg-red-600 rounded-[40px] flex items-center justify-center shadow-2xl"><i data-lucide="zap" class="w-16 h-16 text-white"></i></div>`;
                 title.innerText = "SYSTEM OVERLOAD"; 
                 title.className = "text-6xl font-black uppercase mb-4 tracking-tighter show-font italic text-red-500";
                 body.innerText = "The threshold was exceeded! A defensive or dismissive response caused the patient's nervous system to 'buck', escalating the interaction into full conflict. Try the shift again.";
